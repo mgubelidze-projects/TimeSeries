@@ -1,0 +1,69 @@
+# --------------------------------------------
+# 1. Load data and set Date as index
+# --------------------------------------------
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("your_stock_data.csv")
+
+df['Date'] = pd.to_datetime(df['Date'])
+df = df.set_index('Date')
+
+# we'll use the Close price (replace with 'High' if needed)
+series = df['Close']
+
+# --------------------------------------------
+# 2. Autocorrelation Function (ACF)
+# --------------------------------------------
+from statsmodels.graphics.tsaplots import plot_acf
+
+plt.figure(figsize=(10,4))
+plot_acf(series, lags=40)
+plt.title('Autocorrelation (ACF) of Original Series')
+plt.show()
+
+# --------------------------------------------
+# 3. Augmented Dickey-Fuller (ADF) Test
+# --------------------------------------------
+from statsmodels.tsa.stattools import adfuller
+
+result = adfuller(series)
+print('ADF Statistic:', result[0])
+print('p-value:', result[1])
+print('Critical Values:', result[4])
+
+# --------------------------------------------
+# 4. Differenced Data (to remove trend / non-stationarity)
+# --------------------------------------------
+# 1st difference
+diff_series = series.diff().dropna()
+
+# plot the differenced series
+plt.figure(figsize=(10,4))
+diff_series.plot()
+plt.title('Differenced Series (1st order)')
+plt.show()
+
+# optional: ACF for differenced series
+plt.figure(figsize=(10,4))
+plot_acf(diff_series, lags=40)
+plt.title('ACF of Differenced Series')
+plt.show()
+
+# --------------------------------------------
+# 5. Fit ARIMA Model
+# --------------------------------------------
+from statsmodels.tsa.arima.model import ARIMA
+
+# ARIMA(p,d,q).  d=1 because we already differenced once.
+model = ARIMA(series, order=(5,1,1))
+model_fit = model.fit()
+
+print(model_fit.summary())
+
+# --------------------------------------------
+# 6. Forecast (e.g. next 30 days)
+# --------------------------------------------
+forecast = model_fit.forecast(steps=30)
+print("Forecast values:")
+print(forecast)
