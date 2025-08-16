@@ -1,4 +1,3 @@
-# დამატებული train_test_split
 import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf
@@ -9,7 +8,7 @@ from statsmodels.tsa.arima.model import ARIMA
 # -------------------------------------------------
 # 1) Load data  +  set Date as datetime index
 # -------------------------------------------------
-df = pd.read_csv("your_stock_data.csv")      # <--- შეცვალე საჭირო სახელით
+df = pd.read_csv("/content/drive/MyDrive/DataScience/DataSource/TSLA.csv")      # <--- შეცვალე საჭირო სახელით
 df['Date'] = pd.to_datetime(df['Date'])
 df = df.set_index('Date')
 
@@ -74,30 +73,17 @@ model_fit = model.fit()
 print(model_fit.summary())
 
 
-# -------------------------------------------------
-# 7) Predict over the test period (in-sample prediction)
-# -------------------------------------------------
-start = split_point
-end   = len(series) - 1
+# Number of steps = length of test set
+n_steps = len(test)
 
-predicted = model_fit.predict(start=start, end=end)
-actual    = test
+forecast = model_fit.forecast(steps=n_steps)
 
-# Join both into a DataFrame for comparison
+# Make sure indexes match
+forecast.index = test.index
+
 compare_df = pd.DataFrame({
-    'Actual': actual,
-    'Predicted': predicted
+    'Actual': test,
+    'Predicted': forecast
 })
 
 print(compare_df.head())
-
-
-# -------------------------------------------------
-# 8) Plot Actual vs Predicted (test set)
-# -------------------------------------------------
-plt.figure(figsize=(10,5))
-plt.plot(compare_df.index, compare_df['Actual'], label='Actual')
-plt.plot(compare_df.index, compare_df['Predicted'], label='Predicted')
-plt.legend()
-plt.title('Actual vs Predicted (Test Set)')
-plt.show()
