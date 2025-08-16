@@ -20,3 +20,77 @@ from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error 
 from sklearn.model_selection import GridSearchCV
 #-------------------------------------------------------------------#
+from google.colab import drive
+drive.mount('/content/drive')
+#-------------------------------------------------------------------#
+data = pd.read_csv('gold_price_data.csv')
+data.head()
+#-------------------------------------------------------------------#
+data.info()
+# Missing Values/Null Values Count
+data.isna().sum().sort_values(ascending=False)
+#-------------Correlation Between Columns-------------------------#
+# Calculate correlation matrix
+correlation = data.select_dtypes(include=['number']).corr()
+
+# Create heatmap
+sns.heatmap(correlation, cmap='coolwarm',
+            center=0, annot=True)
+
+# Set title and axis labels
+plt.title('Correlation Matrix Heatmap')
+plt.xlabel('Features')
+plt.ylabel('Features')
+
+# Show plot
+plt.show()
+#-------------------------------------------------------------------#
+#მაღალი კორელაციის გამო შეგვიძლია წავშალოთ SLV სვეტი.
+# drop SlV column
+data.drop("SLV", axis=1,
+             inplace=True)
+#--------------------Data Wrangling---------------------------------#
+data.set_index("Date", inplace=True)
+# plot price of gold for each increasing day
+data["EUR/USD"].plot()
+plt.title("Change in price of gold through date")
+plt.xlabel("date")
+plt.ylabel("price")
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
