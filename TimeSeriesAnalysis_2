@@ -1,0 +1,103 @@
+# დამატებული train_test_split
+import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.arima.model import ARIMA
+
+
+# -------------------------------------------------
+# 1) Load data  +  set Date as datetime index
+# -------------------------------------------------
+df = pd.read_csv("your_stock_data.csv")      # <--- შეცვალე საჭირო სახელით
+df['Date'] = pd.to_datetime(df['Date'])
+df = df.set_index('Date')
+
+# we'll forecast the Close price (შეცვალე თუ სხვა სვეტია)
+series = df['Close']
+
+
+# -------------------------------------------------
+# 2) ACF plot (original series)
+# -------------------------------------------------
+plt.figure(figsize=(10,4))
+plot_acf(series, lags=40)
+plt.title('ACF of Original Series')
+plt.show()
+
+
+# -------------------------------------------------
+# 3) Augmented Dickey–Fuller Test  (original series)
+# -------------------------------------------------
+result = adfuller(series)
+print("ADF Statistic:", result[0])
+print("p-value:", result[1])
+print("Critical Values:", result[4])
+
+
+# -------------------------------------------------
+# 4) Create Differenced Series (1st difference)
+# -------------------------------------------------
+diff_series = series.diff().dropna()
+
+plt.figure(figsize=(10,4))
+diff_series.plot()
+plt.title('1st Differenced Series')
+plt.show()
+
+# ACF of differenced series (optional)
+plt.figure(figsize=(10,4))
+plot_acf(diff_series, lags=40)
+plt.title('ACF of Differenced Series')
+plt.show()
+
+
+# -------------------------------------------------
+# 5) Train / Test chronological split
+# -------------------------------------------------
+#   (80% train / 20% test)
+split_point = int(len(series) * 0.8)
+train = series[:split_point]
+test  = series[split_point:]
+
+print("Train length:", len(train))
+print("Test  length:", len(test))
+
+
+# -------------------------------------------------
+# 6) Fit ARIMA on the train set  (order=(p,d,q))
+#    d = 1  because we already differenced
+# -------------------------------------------------
+model = ARIMA(train, order=(5,1,1))
+model_fit = model.fit()
+
+print(model_fit.summary())
+
+
+# -------------------------------------------------
+# 7) Predict over the test period (in-sample prediction)
+# -------------------------------------------------
+start = split_point
+end   = len(series) - 1
+
+predicted = model_fit.predict(start=start, end=end)
+actual    = test
+
+# Join both into a DataFrame for comparison
+compare_df = pd.DataFrame({
+    'Actual': actual,
+    'Predicted': predicted
+})
+
+print(compare_df.head())
+
+
+# -------------------------------------------------
+# 8) Plot Actual vs Predicted (test set)
+# -------------------------------------------------
+plt.figure(figsize=(10,5))
+plt.plot(compare_df.index, compare_df['Actual'], label='Actual')
+plt.plot(compare_df.index, compare_df['Predicted'], label='Predicted')
+plt.legend()
+plt.title('Actual vs Predicted (Test Set)')
+plt.show()
