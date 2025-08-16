@@ -112,7 +112,8 @@ for i, item in enumerate(temp):
 plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=2.0)
 plt.show()
 #--------------------------------------------------------------#
-
+# It can be seen clearly that the column 'USO' has outliers present in the column, 
+# so we create a function to normalize the outlier present in the column.
 
 
 
