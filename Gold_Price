@@ -57,6 +57,62 @@ plt.title("Change in price of gold through date")
 plt.xlabel("date")
 plt.ylabel("price")
 plt.show()
+# Through this graph, we are unable to find any good insight into the change in the price of gold. 
+# It looks very noisy, to see the trend in the data we have to make the graph smooth 
+# Trend in Gold Prices Using Moving Averages 
+# apply rolling mean with window size of 3
+data["price_trend"] = data["EUR/USD"]\
+    .rolling(window=20).mean()
+
+# reset the index to date column
+data.reset_index("Date", inplace=True)
+
+# since we have used rolling method
+# for 20 rows first 2 rows will be NAN
+data["price_trend"].loc[20:].plot()
+
+# set title of the chart
+plt.title("Trend in price of gold through date")
+
+# set x_label of the plot
+plt.xlabel("date")
+plt.ylabel("price")
+plt.show()
+#To visualize the trend in the data we have to apply a smoothing process on this line which looks very noisy. 
+#There are several ways to apply to smooth. In our project, 
+#we will take an average of 20 previous data points using the pandas rolling function. 
+#This is also known as the Moving Average.
+#Now the graph looks less noisy and here we can analyze the trend in change in the gold price.
+#-------------------Distribution  of Columns -------------------------#
+fig = plt.figure(figsize=(8, 8))
+
+# suptitle of the graph
+fig.suptitle('Distribution of data across column')
+temp = data.drop("Date", axis=1).columns.tolist()
+for i, item in enumerate(temp):
+    plt.subplot(2, 3, i+1)
+    sns.histplot(data=data, x=item, kde=True)
+plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=2.0)
+plt.show()
+#------------------------skewness----------------------------#
+# skewness along the index axis
+print(dataset.drop("Date", axis=1).skew(axis=0, skipna=True))
+# Column USO has the highest skewness , 
+# so here we will apply square root transformation on this column to reduce its skewness
+# apply saquare root transformation
+# on the skewed dataset
+data["USO"] = data["USO"]\
+    .apply(lambda x: np.sqrt(x))
+#-------------------Handling Outliers -------------------------#
+fig = plt.figure(figsize=(8, 8))
+temp = data.drop("Date", axis=1).columns.tolist()
+for i, item in enumerate(temp):
+    plt.subplot(2, 3, i+1)
+    sns.boxplot(data=data, x=item, color='violet')
+plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=2.0)
+plt.show()
+#--------------------------------------------------------------#
+
 
 
 
